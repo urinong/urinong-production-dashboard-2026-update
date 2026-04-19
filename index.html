@@ -7,6 +7,7 @@
 <title>2026년 가톨릭농민회 생산계획 대시보드 (계속 업데이트)</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#f7f6f3;--surface:#fff;--surface-alt:#f0eee9;--text:#1a1a1a;--text-muted:#6b6b6b;--text-light:#999;--border:#e2e0db;--border-light:#eceae5;--accent:#2d5016;--accent-light:#e8f0e2;--accent-mid:#4a7a2e;--hover:#f5f3ee;--badge-가공:#7c5c3a;--badge-가공-bg:#f5ede4;--badge-과수:#8b3a3a;--badge-과수-bg:#fbe9e9;--badge-채소:#2d6a3f;--badge-채소-bg:#e4f2e9;--badge-주잡곡:#6b5b1e;--badge-주잡곡-bg:#f5f0dc;--badge-축산:#5a3d6b;--badge-축산-bg:#f0e8f5;--badge-수산:#1e5a6b;--badge-수산-bg:#e0f0f5;--badge-기타:#6b6b6b;--badge-기타-bg:#f0f0f0}
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}.container{max-width:1400px;margin:0 auto;padding:20px}
@@ -14,7 +15,7 @@
 .live-badge{display:inline-block;font-size:11px;padding:2px 10px;border-radius:10px;background:#e4f2e9;color:#2d6a3f;font-weight:500;margin-left:10px;vertical-align:middle}.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2d6a3f;margin-right:4px;animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .last-update{font-size:11px;color:var(--text-light);margin-top:8px}
 .summary-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}.summary-card{background:var(--surface);border:1px solid var(--border-light);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;text-align:center}.summary-card:hover{border-color:var(--accent);background:var(--accent-light)}.summary-card.active{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 1px var(--accent)}.summary-card .diocese{font-size:15px;font-weight:600}.summary-card .count{font-size:11px;color:var(--text-muted);margin-top:2px}
-.toolbar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}.search-box{flex:1;min-width:200px;position:relative}.search-box input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);outline:none;transition:border-color .15s}.search-box input:focus{border-color:var(--accent)}.search-box::before{content:"\1F50D";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px}.filter-select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--bg);outline:none;cursor:pointer}.result-count{font-size:12px;color:var(--text-muted);white-space:nowrap}.btn-reset{padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--surface);cursor:pointer;transition:all .15s;color:var(--text-muted)}.btn-reset:hover{background:var(--surface-alt);color:var(--text)}.btn-refresh{padding:8px 14px;border:1px solid var(--accent);border-radius:8px;font-size:12px;font-family:inherit;background:var(--accent-light);cursor:pointer;color:var(--accent);font-weight:500;transition:all .15s}.btn-refresh:hover{background:var(--accent);color:#fff}
+.toolbar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}.search-box{flex:1;min-width:200px;position:relative}.search-box input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);outline:none;transition:border-color .15s}.search-box input:focus{border-color:var(--accent)}.search-box::before{content:"\1F50D";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px}.filter-select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--bg);outline:none;cursor:pointer}.result-count{font-size:12px;color:var(--text-muted);white-space:nowrap}.btn-reset{padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--surface);cursor:pointer;transition:all .15s;color:var(--text-muted)}.btn-reset:hover{background:var(--surface-alt);color:var(--text)}.btn-refresh{padding:8px 14px;border:1px solid var(--accent);border-radius:8px;font-size:12px;font-family:inherit;background:var(--accent-light);cursor:pointer;color:var(--accent);font-weight:500;transition:all .15s}.btn-refresh:hover{background:var(--accent);color:#fff}.btn-download{padding:8px 14px;border:1px solid #1e6b3a;border-radius:8px;font-size:12px;font-family:inherit;background:#e0f2e9;cursor:pointer;color:#1e6b3a;font-weight:500;transition:all .15s;white-space:nowrap}.btn-download:hover{background:#1e6b3a;color:#fff}.btn-download:disabled{opacity:.5;cursor:not-allowed}
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px;min-width:1200px}thead th{position:sticky;top:0;background:var(--surface-alt);padding:10px 8px;text-align:left;font-weight:600;font-size:11px;color:var(--text-muted);border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;transition:background .1s}thead th:hover{background:var(--accent-light);color:var(--accent)}.sort-arrow{font-size:10px;margin-left:3px;opacity:.3}thead th.sorted .sort-arrow{opacity:1;color:var(--accent)}tbody td{padding:8px;border-bottom:1px solid var(--border-light);vertical-align:top}tbody tr{transition:background .08s;cursor:pointer}tbody tr:hover{background:var(--hover)}tbody tr:last-child td{border-bottom:none}
 .cat-badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;white-space:nowrap}.cat-가공{background:var(--badge-가공-bg);color:var(--badge-가공)}.cat-과수{background:var(--badge-과수-bg);color:var(--badge-과수)}.cat-채소{background:var(--badge-채소-bg);color:var(--badge-채소)}.cat-주잡곡{background:var(--badge-주잡곡-bg);color:var(--badge-주잡곡)}.cat-축산{background:var(--badge-축산-bg);color:var(--badge-축산)}.cat-수산{background:var(--badge-수산-bg);color:var(--badge-수산)}.cat-기타{background:var(--badge-기타-bg);color:var(--badge-기타)}
 .diocese-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.dot-광주{background:#2d6a3f}.dot-마산{background:#b85c3a}.dot-부산{background:#3a6cb8}.dot-안동{background:#7c5c9a}.dot-의정부{background:#3a8fb8}.dot-원주{background:#6B8E23}.dot-인천{background:#b83a5c}.dot-전주{background:#b8953a}.dot-청주{background:#5c9a3a}.dot-춘천{background:#3ab89f}
@@ -93,6 +94,7 @@
       <select class="filter-select" id="filterMethod" onchange="applyFilters()"><option value="">생산방법 전체</option><option value="유기농">유기농</option><option value="무농약">무농약</option><option value="GAP">GAP</option><option value="무항생제">무항생제</option><option value="관행">관행</option><option value="일반">일반</option><option value="기타">기타</option></select>
       <select class="filter-select" id="filterShipTime" onchange="applyFilters()"><option value="">출하시기 전체</option><option value="연중">연중</option><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option><option value="기타">기타</option></select>
       <button class="btn-reset" onclick="resetFilters()">초기화</button>
+      <button class="btn-download" onclick="downloadTableXLSX()" title="현재 필터 적용 결과를 엑셀로 다운로드">⬇ 엑셀 다운로드</button>
       <button class="btn-refresh" onclick="loadData()">새로고침</button>
       <span class="result-count" id="resultCount"></span>
     </div>
@@ -122,6 +124,7 @@
       <div class="search-box"><input type="text" id="producerSearch" placeholder="생산자 이름 검색..." oninput="filterProducers()"></div>
       <select class="filter-select" id="producerDiocese" onchange="filterProducers()"><option value="">교구 전체</option></select>
       <select class="filter-select" id="producerRepCat" onchange="filterProducers()"><option value="">대표품목 전체</option><option value="주잡곡">주잡곡</option><option value="채소">채소</option><option value="과수">과수</option><option value="축산">축산</option><option value="수산">수산</option><option value="가공">가공</option></select>
+      <button class="btn-download" onclick="downloadProducerXLSX()" title="현재 필터 적용 결과를 엑셀로 다운로드 (요약+상세 시트)">⬇ 엑셀 다운로드</button>
       <span class="result-count" id="producerCount"></span>
     </div>
     <div id="producerList"></div>
@@ -413,6 +416,137 @@ function renderProducers(){
     html+='<div style="margin-top:6px;font-size:11px;color:var(--text-light)">'+(p.methods.size?[...p.methods].join(', '):'')+'</div></div>'});
   html+='</div>';document.getElementById('producerList').innerHTML=html}
 function filterProducers(){renderProducers()}
+
+// === 엑셀 다운로드 ===
+function sanitizeFn(s){return String(s||'').replace(/[\\/:*?"<>|\s]+/g,'_').substring(0,20)}
+function todayStr(){const d=new Date();const kst=new Date(d.toLocaleString('en-US',{timeZone:'Asia/Seoul'}));return kst.getFullYear()+'-'+String(kst.getMonth()+1).padStart(2,'0')+'-'+String(kst.getDate()).padStart(2,'0')}
+function numCell(v){if(!v&&v!==0)return '';const s=String(v).trim();if(!s)return '';const c=s.replace(/,/g,'');return /^-?\d+(\.\d+)?$/.test(c)?parseFloat(c):s}
+function colLetter(n){let s='';while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)}return s}
+
+function getFilteredProducers(){
+  const q=(document.getElementById('producerSearch').value||'').trim().toLowerCase();
+  const diocese=document.getElementById('producerDiocese').value;
+  const repCat=document.getElementById('producerRepCat').value;
+  const producers={};
+  DATA.forEach(r=>{
+    const key=g(r,'교구')+'_'+g(r,'이름');
+    if(!producers[key]){
+      const pid=g(r,'생산자ID');
+      producers[key]={id:pid,교구:g(r,'교구'),분회:g(r,'분회'),이름:g(r,'이름'),items:[],methods:new Set(),cats:{},대표품목:g(PROFILES[pid]||{},'대표품목')};
+    }
+    producers[key].items.push(r);
+    const m=g(r,'생산방법');if(m)producers[key].methods.add(normMethod(m));
+    const c=normCat(g(r,'품목별'));if(c)producers[key].cats[c]=(producers[key].cats[c]||0)+1;
+  });
+  let list=Object.values(producers);
+  if(diocese)list=list.filter(p=>p.교구===diocese);
+  if(repCat)list=list.filter(p=>p.대표품목===repCat);
+  if(q)list=list.filter(p=>(p.이름+p.분회+p.items.map(i=>g(i,'생산품목')).join(' ')).toLowerCase().includes(q));
+  return list.sort((a,b)=>a.교구.localeCompare(b.교구,'ko')||a.분회.localeCompare(b.분회,'ko')||a.이름.localeCompare(b.이름,'ko'));
+}
+
+function downloadTableXLSX(){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');return}
+  if(!filtered.length){alert('다운로드할 데이터가 없습니다.');return}
+
+  const headers=['생산자ID','교구','분회','이름','품목별','생산품목','품종','면적(㎡)','생산방법','인증기간(연차)','총생산량','조직내출하량','출하량단위','출하시기','비고'];
+  const keys=['생산자ID','교구','분회','이름','품목별','생산품목','품종','면적(㎡)','생산방법','인증기간(연차)','총생산량','조직내출하량','출하량단위','출하시기','비고_원본'];
+  const numSet=new Set(['면적(㎡)','총생산량','조직내출하량']);
+  const rows=filtered.map(r=>keys.map((k,i)=>{const v=g(r,k);return numSet.has(headers[i])?numCell(v):v}));
+
+  const nowStr=new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
+  const conditions=[
+    ['검색조건 (다운로드 시점)',''],
+    ['다운로드 시각',nowStr],
+    ['교구 필터',activeDiocese||'전체'],
+    ['품목별',document.getElementById('filterCategory').value||'전체'],
+    ['생산방법',document.getElementById('filterMethod').value||'전체'],
+    ['출하시기',document.getElementById('filterShipTime').value||'전체'],
+    ['검색어',document.getElementById('searchInput').value.trim()||'(없음)'],
+    ['결과 건수',filtered.length+'건'],
+    ['전체 건수',DATA.length+'건']
+  ];
+
+  const wb=XLSX.utils.book_new();
+  const ws1=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws1['!cols']=[{wch:12},{wch:8},{wch:12},{wch:10},{wch:8},{wch:14},{wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:10},{wch:6},{wch:14},{wch:24}];
+  ws1['!autofilter']={ref:'A1:'+colLetter(headers.length)+(rows.length+1)};
+  ws1['!freeze']={xSplit:0,ySplit:1};
+  XLSX.utils.book_append_sheet(wb,ws1,'생산계획');
+  const ws2=XLSX.utils.aoa_to_sheet(conditions);
+  ws2['!cols']=[{wch:20},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws2,'검색조건');
+
+  const parts=[];
+  if(activeDiocese)parts.push(activeDiocese);
+  const fc=document.getElementById('filterCategory').value;if(fc)parts.push(fc);
+  const fm=document.getElementById('filterMethod').value;if(fm)parts.push(fm);
+  const fs=document.getElementById('filterShipTime').value;if(fs)parts.push(/^\d+$/.test(fs)?fs+'월':fs);
+  const fq=document.getElementById('searchInput').value.trim();if(fq)parts.push('검색_'+sanitizeFn(fq));
+  const suffix=parts.length?'_'+parts.join('_'):'_전체';
+  XLSX.writeFile(wb,`농민회_생산계획_${todayStr()}${suffix}_${filtered.length}건.xlsx`);
+}
+
+function downloadProducerXLSX(){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');return}
+  const list=getFilteredProducers();
+  if(!list.length){alert('다운로드할 생산자가 없습니다.');return}
+
+  // 요약 시트
+  const sumHeaders=['생산자ID','교구','분회','이름','대표품목','품목수','품목분류분포','주요생산방법','연락처','주소'];
+  const sumRows=list.map(p=>{
+    const pf=PROFILES[p.id]||{};
+    return [p.id,p.교구,p.분회,p.이름,p.대표품목||'',p.items.length,
+      Object.entries(p.cats).map(([k,v])=>k+'('+v+')').join(', '),
+      [...p.methods].join(', '),
+      g(pf,'연락처'),g(pf,'주소')];
+  });
+
+  // 상세 시트
+  const detHeaders=['생산자ID','교구','분회','이름','품목별','생산품목','품종','면적(㎡)','생산방법','인증기간(연차)','총생산량','조직내출하량','출하량단위','출하시기','비고'];
+  const detKeys=['생산자ID','교구','분회','이름','품목별','생산품목','품종','면적(㎡)','생산방법','인증기간(연차)','총생산량','조직내출하량','출하량단위','출하시기','비고_원본'];
+  const numSet=new Set(['면적(㎡)','총생산량','조직내출하량']);
+  const detRows=[];
+  list.forEach(p=>{p.items.forEach(it=>{
+    detRows.push(detKeys.map((k,i)=>{const v=g(it,k);return numSet.has(detHeaders[i])?numCell(v):v}));
+  })});
+
+  const nowStr=new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
+  const totalItems=list.reduce((s,p)=>s+p.items.length,0);
+  const conditions=[
+    ['검색조건 (생산자 조회)',''],
+    ['다운로드 시각',nowStr],
+    ['교구 필터',document.getElementById('producerDiocese').value||'전체'],
+    ['대표품목 필터',document.getElementById('producerRepCat').value||'전체'],
+    ['검색어',document.getElementById('producerSearch').value.trim()||'(없음)'],
+    ['결과 생산자 수',list.length+'명'],
+    ['결과 총 품목 수',totalItems+'건']
+  ];
+
+  const wb=XLSX.utils.book_new();
+  const ws1=XLSX.utils.aoa_to_sheet([sumHeaders,...sumRows]);
+  ws1['!cols']=[{wch:12},{wch:8},{wch:12},{wch:12},{wch:10},{wch:6},{wch:36},{wch:22},{wch:14},{wch:30}];
+  ws1['!autofilter']={ref:'A1:'+colLetter(sumHeaders.length)+(sumRows.length+1)};
+  ws1['!freeze']={xSplit:0,ySplit:1};
+  XLSX.utils.book_append_sheet(wb,ws1,'생산자 요약');
+
+  const ws2=XLSX.utils.aoa_to_sheet([detHeaders,...detRows]);
+  ws2['!cols']=[{wch:12},{wch:8},{wch:12},{wch:12},{wch:8},{wch:14},{wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:10},{wch:6},{wch:14},{wch:24}];
+  ws2['!autofilter']={ref:'A1:'+colLetter(detHeaders.length)+(detRows.length+1)};
+  ws2['!freeze']={xSplit:0,ySplit:1};
+  XLSX.utils.book_append_sheet(wb,ws2,'생산자 상세');
+
+  const ws3=XLSX.utils.aoa_to_sheet(conditions);
+  ws3['!cols']=[{wch:20},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws3,'검색조건');
+
+  const parts=[];
+  const pd=document.getElementById('producerDiocese').value;if(pd)parts.push(pd);
+  const prc=document.getElementById('producerRepCat').value;if(prc)parts.push(prc);
+  const pq=document.getElementById('producerSearch').value.trim();if(pq)parts.push('검색_'+sanitizeFn(pq));
+  const suffix=parts.length?'_'+parts.join('_'):'_전체';
+  XLSX.writeFile(wb,`농민회_생산자목록_${todayStr()}${suffix}_${list.length}명.xlsx`);
+}
 
 function renderInsights(){
   if(!DATA.length)return;
