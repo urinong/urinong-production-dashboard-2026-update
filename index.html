@@ -63,18 +63,20 @@ details.continuing[open] summary{margin-bottom:10px;color:var(--text)}
 .continuing-tag:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
 .continuing-tag b{font-weight:500;opacity:.55;font-size:11px}
 /* Insight strip */
-.insight-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:14px}
-.insight-card{background:var(--surface);border:1px solid var(--border-light);border-radius:10px;padding:13px 16px;transition:all .15s}
+.insight-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.insight-card{background:var(--surface);border:1px solid var(--border-light);border-radius:10px;padding:14px 18px;transition:all .15s}
 .insight-card.highlight{border-color:var(--accent);background:linear-gradient(to bottom,#fff,var(--accent-light))}
-.insight-card-title{font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;letter-spacing:.3px;text-transform:none}
-.insight-card-body{font-size:13px;line-height:1.5}
-.insight-item{display:inline-block;padding:2px 8px;margin:2px 2px 2px 0;border-radius:4px;background:var(--surface-alt);font-size:12px;cursor:pointer;transition:all .1s;border:1px solid transparent}
+.insight-card-title{font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:10px;letter-spacing:.3px}
+.insight-card-body{font-size:13px;line-height:1.65}
+.insight-item{display:inline-block;padding:3px 9px;margin:2px 3px 2px 0;border-radius:4px;background:var(--surface-alt);font-size:12px;cursor:pointer;transition:all .1s;border:1px solid transparent}
 .insight-item:hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
-.insight-item b{font-weight:500;opacity:.55;font-size:11px;margin-left:2px}
-.insight-big{font-size:26px;font-weight:700;color:var(--accent);line-height:1}
-.insight-big-sub{font-size:12px;color:var(--text-muted);font-weight:400;margin-left:3px}
-.insight-dio-line{display:block;margin-bottom:2px}
+.insight-item b{font-weight:500;opacity:.55;font-size:11px;margin-left:3px}
+.insight-more-btn{display:inline-block;padding:3px 10px;margin:2px 0 2px 4px;font-size:11px;color:var(--accent);cursor:pointer;font-weight:500;border-bottom:1px dashed var(--accent);border-radius:3px;transition:all .15s}
+.insight-more-btn:hover{background:var(--accent-light);border-bottom-style:solid}
 .empty-hint{color:var(--text-muted);font-size:12px;font-style:italic}
+/* Section label action button */
+.btn-download-sm{margin-left:auto;align-self:center;padding:5px 11px;border:1px solid #1e6b3a;border-radius:6px;font-size:11px;font-family:inherit;background:#e0f2e9;cursor:pointer;color:#1e6b3a;font-weight:500;transition:all .15s;white-space:nowrap}
+.btn-download-sm:hover{background:#1e6b3a;color:#fff}
 @media(max-width:768px){.month-section{padding:14px 16px}.month-title{font-size:16px}.product-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.insight-strip{grid-template-columns:1fr}}
 .insight-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px}
 .insight-title{font-size:16px;font-weight:600;color:var(--accent);margin-bottom:4px}
@@ -691,6 +693,50 @@ function expandMonth(m,btn){
   btn.style.display='none';
 }
 
+function downloadMonthStartXLSX(m){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');return}
+  const startRecs=DATA.filter(r=>{
+    const info=getShipInfo(r);
+    return !info.isUnparseable&&info.startMonths.has(m);
+  });
+  if(!startRecs.length){alert(m+'월에 새로 시작되는 출하 품목이 없습니다.');return}
+
+  // 생산자 수 내림차순 → 교구 수 내림차순 정렬 (aggregateByProduct의 정렬 순서 반영)
+  const prods=aggregateByProduct(startRecs);
+  const sorted=[];
+  prods.forEach(p=>{p.records.forEach(r=>sorted.push(r))});
+
+  const headers=['생산자ID','교구','분회','이름','품목별','생산품목','품종','면적(㎡)','생산방법','인증기간(연차)','총생산량','조직내출하량','출하량단위','출하시기','비고'];
+  const keys=['생산자ID','교구','분회','이름','품목별','생산품목','품종','면적(㎡)','생산방법','인증기간(연차)','총생산량','조직내출하량','출하량단위','출하시기','비고_원본'];
+  const numSet=new Set(['면적(㎡)','총생산량','조직내출하량']);
+  const rows=sorted.map(r=>keys.map((k,i)=>{const v=g(r,k);return numSet.has(headers[i])?numCell(v):v}));
+
+  const nowStr=new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
+  const conditions=[
+    ['조건 (월별 출하 시작 품목)',''],
+    ['다운로드 시각',nowStr],
+    ['대상 월',m+'월 (출하가 새로 시작되는 품목)'],
+    ['품목 수',prods.length+'종'],
+    ['레코드 수',sorted.length+'건'],
+    ['정렬','생산자 수 내림차순 → 교구 수 내림차순 → 품목명'],
+    ['',''],
+    ['※ 참고','해당 월이 출하 시작월인 품목만 포함됩니다.'],
+    ['','"연중" 출하 품목이나 해당 월에도 "계속 출하 중"인 품목은 제외됩니다.']
+  ];
+
+  const wb=XLSX.utils.book_new();
+  const ws1=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws1['!cols']=[{wch:12},{wch:8},{wch:12},{wch:10},{wch:8},{wch:14},{wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:10},{wch:6},{wch:14},{wch:24}];
+  ws1['!autofilter']={ref:'A1:'+colLetter(headers.length)+(rows.length+1)};
+  ws1['!freeze']={xSplit:0,ySplit:1};
+  XLSX.utils.book_append_sheet(wb,ws1,m+'월 출하시작');
+  const ws2=XLSX.utils.aoa_to_sheet(conditions);
+  ws2['!cols']=[{wch:20},{wch:50}];
+  XLSX.utils.book_append_sheet(wb,ws2,'조건');
+
+  XLSX.writeFile(wb,`농민회_${m}월출하시작_${todayStr()}_${sorted.length}건.xlsx`);
+}
+
 function renderMonthSection(m,label,cls,isCurrent){
   const startRecs=[],activeRecs=[];
   DATA.forEach(r=>{
@@ -710,7 +756,9 @@ function renderMonthSection(m,label,cls,isCurrent){
   if(startProds.length){
     const top=startProds.slice(0,20);
     const rest=startProds.slice(20);
-    html+='<div class="section-label">이 달에 출하가 시작되는 품목 <span class="sub">대표 '+top.length+'종'+(rest.length?' (전체 '+startProds.length+'종)':'')+' · 생산자 수 순</span></div>';
+    html+='<div class="section-label">이 달에 출하가 시작되는 품목 <span class="sub">대표 '+top.length+'종'+(rest.length?' (전체 '+startProds.length+'종)':'')+' · 생산자 수 순</span>';
+    html+='<button class="btn-download-sm" onclick="downloadMonthStartXLSX('+m+')" title="'+m+'월 출하 시작 품목 전체를 엑셀로 다운로드">⬇ 엑셀 다운로드</button>';
+    html+='</div>';
     html+='<div class="product-grid">';
     top.forEach(p=>{html+=renderProductCard(p)});
     rest.forEach(p=>{html+=renderProductCard(p,'extra-start-'+m)});
@@ -738,7 +786,7 @@ function renderMonthSection(m,label,cls,isCurrent){
 }
 
 function renderInsightStrip(curM,nextM){
-  // ① 이번 달 출하 종료 임박 품목 (이번 달까지만 출하, 다음 달엔 안 됨)
+  // ① 이번 달 출하 종료 품목 (이번 달까지만 출하, 다음 달엔 안 됨)
   const endingRecs=DATA.filter(r=>{
     const info=getShipInfo(r);
     if(info.isUnparseable||info.isYearRound)return false;
@@ -746,25 +794,11 @@ function renderInsightStrip(curM,nextM){
   });
   const endingProds=aggregateByProduct(endingRecs);
 
-  // ② 다음 달 신규 개시 카운트다운
-  const now=getKSTDate();
-  const nextFirst=new Date(now.getFullYear(),now.getMonth()+1,1);
-  const diffDays=Math.max(0,Math.ceil((nextFirst-now)/(1000*60*60*24)));
-  const nextStartRecs=DATA.filter(r=>{
-    const info=getShipInfo(r);
-    return !info.isUnparseable&&info.startMonths.has(nextM);
-  });
-  const nextStartProds=aggregateByProduct(nextStartRecs);
-
-  // ③ 희소 품목 (이번 달 활성, 생산자 1~2명)
+  // ② 교구별 이번 달 주력 품목
   const allCurRecs=DATA.filter(r=>{
     const info=getShipInfo(r);
     return !info.isUnparseable&&info.activeMonths.has(curM);
   });
-  const allCurProds=aggregateByProduct(allCurRecs);
-  const rareProds=allCurProds.filter(p=>p.producerCount<=2).sort((a,b)=>a.producerCount-b.producerCount||b.dioceseCount-a.dioceseCount);
-
-  // ④ 교구별 이번 달 주력 품목
   const dioceseOrder=['광주','마산','부산','안동','의정부','원주','인천','전주','청주','춘천'];
   const dioceseTop={};
   dioceseOrder.forEach(d=>{
@@ -774,61 +808,44 @@ function renderInsightStrip(curM,nextM){
     dioceseTop[d]=prods[0];
   });
 
+  const INITIAL=6; // 최초 노출 개수
   let html='<div class="insight-strip">';
 
-  // ①
-  html+='<div class="insight-card"><div class="insight-card-title">🕒 이번 달 종료 임박 품목</div><div class="insight-card-body">';
+  // ① 이번 달 출하 종료 품목
+  html+='<div class="insight-card highlight"><div class="insight-card-title">🕒 이번 달('+curM+'월) 출하 종료 품목</div><div class="insight-card-body">';
   if(endingProds.length){
-    endingProds.slice(0,6).forEach(p=>{
-      html+='<span class="insight-item" onclick="showProductDetail(\''+esc(p.product)+'\',\''+p.category+'\')">'+p.product+'<b>'+p.producerCount+'</b></span>';
+    endingProds.forEach((p,i)=>{
+      const extra=i>=INITIAL?' ending-extra':'';
+      const style=i>=INITIAL?' style="display:none"':'';
+      html+='<span class="insight-item'+extra+'"'+style+' onclick="showProductDetail(\''+esc(p.product)+'\',\''+p.category+'\')">'+p.product+'<b>'+p.producerCount+'</b></span>';
     });
-    if(endingProds.length>6)html+=' <span style="color:var(--text-muted);font-size:11px">외 '+(endingProds.length-6)+'종</span>';
+    if(endingProds.length>INITIAL){
+      html+='<span class="insight-more-btn" onclick="expandEnding(this)">외 '+(endingProds.length-INITIAL)+'종 모두 보기 ▾</span>';
+    }
   }else{
     html+='<span class="empty-hint">해당 품목 없음</span>';
   }
   html+='</div></div>';
 
-  // ②
-  html+='<div class="insight-card highlight"><div class="insight-card-title">📅 다음 달('+nextM+'월) 신규 개시</div><div class="insight-card-body">';
-  html+='<div><span class="insight-big">'+nextStartProds.length+'</span><span class="insight-big-sub">종</span>';
-  if(diffDays>0)html+='<span style="font-size:11px;color:var(--text-muted);margin-left:8px">D-'+diffDays+'일</span>';
-  html+='</div>';
-  if(nextStartProds.length){
-    html+='<div style="margin-top:4px">';
-    nextStartProds.slice(0,4).forEach(p=>{
-      html+='<span class="insight-item" onclick="showProductDetail(\''+esc(p.product)+'\',\''+p.category+'\')">'+p.product+'<b>'+p.producerCount+'</b></span>';
-    });
-    if(nextStartProds.length>4)html+=' <span style="color:var(--text-muted);font-size:11px">외 '+(nextStartProds.length-4)+'</span>';
-    html+='</div>';
-  }
-  html+='</div></div>';
-
-  // ③
-  html+='<div class="insight-card"><div class="insight-card-title">🎯 희소 품목 (1~2명 생산)</div><div class="insight-card-body">';
-  if(rareProds.length){
-    rareProds.slice(0,6).forEach(p=>{
-      html+='<span class="insight-item" onclick="showProductDetail(\''+esc(p.product)+'\',\''+p.category+'\')">'+p.product+'<b>'+p.producerCount+'</b></span>';
-    });
-    if(rareProds.length>6)html+=' <span style="color:var(--text-muted);font-size:11px">외 '+(rareProds.length-6)+'종</span>';
-  }else{
-    html+='<span class="empty-hint">해당 품목 없음</span>';
-  }
-  html+='</div></div>';
-
-  // ④
-  html+='<div class="insight-card"><div class="insight-card-title">🏞️ 교구별 이번 달 주력 품목</div><div class="insight-card-body" style="font-size:12px;line-height:1.7">';
+  // ② 교구별 이번 달 주력 품목
+  html+='<div class="insight-card"><div class="insight-card-title">🏞️ 교구별 이번 달 주력 품목</div><div class="insight-card-body">';
   let dioCount=0;
   dioceseOrder.forEach(d=>{
     const top=dioceseTop[d];
     if(!top)return;
     dioCount++;
-    html+='<span class="insight-item" style="font-size:11px" onclick="showProductDetail(\''+esc(top.product)+'\',\''+top.category+'\')"><span class="diocese-dot dot-'+d+'"></span>'+d+' · '+top.product+'<b>'+top.producerCount+'</b></span>';
+    html+='<span class="insight-item" onclick="showProductDetail(\''+esc(top.product)+'\',\''+top.category+'\')"><span class="diocese-dot dot-'+d+'"></span>'+d+' · '+top.product+'<b>'+top.producerCount+'</b></span>';
   });
   if(!dioCount)html+='<span class="empty-hint">해당 품목 없음</span>';
   html+='</div></div>';
 
   html+='</div>';
   return html;
+}
+
+function expandEnding(btn){
+  document.querySelectorAll('.ending-extra').forEach(el=>el.style.display='');
+  btn.style.display='none';
 }
 
 function renderMonthly(){
