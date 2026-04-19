@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjE2IiBmaWxsPSIjMkM1RjJEIi8+CjxwYXRoIGQ9Ik0xNiAyNmMwIDAgMC04IDAtMTJzLTQtNi00LTZjMiAxIDQgMyA0IDZjMC0zIDItNSA0LTZjMCAwLTQgMi00IDZzMCAxMiAwIDEyeiIgZmlsbD0iIzk3QkM2MiIgc3Ryb2tlPSIjZThmMGUyIiBzdHJva2Utd2lkdGg9IjAuNSIvPgo8cGF0aCBkPSJNMTIgMTRjLTItMS0zLTMtMi01YzEgMSAyIDMgNCA0IiBmaWxsPSIjOTdCQzYyIiBvcGFjaXR5PSIwLjgiLz4KPHBhdGggZD0iTTIwIDE0YzItMSAzLTMgMi01Yy0xIDEtMiAzLTQgNCIgZmlsbD0iIzk3QkM2MiIgb3BhY2l0eT0iMC44Ii8+Cjwvc3ZnPg==" type="image/svg+xml">
+<title>2026년 가톨릭농민회 생산계획 대시보드 (계속 업데이트)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{--bg:#f7f6f3;--surface:#fff;--surface-alt:#f0eee9;--text:#1a1a1a;--text-muted:#6b6b6b;--text-light:#999;--border:#e2e0db;--border-light:#eceae5;--accent:#2d5016;--accent-light:#e8f0e2;--accent-mid:#4a7a2e;--hover:#f5f3ee;--badge-가공:#7c5c3a;--badge-가공-bg:#f5ede4;--badge-과수:#8b3a3a;--badge-과수-bg:#fbe9e9;--badge-채소:#2d6a3f;--badge-채소-bg:#e4f2e9;--badge-주잡곡:#6b5b1e;--badge-주잡곡-bg:#f5f0dc;--badge-축산:#5a3d6b;--badge-축산-bg:#f0e8f5;--badge-수산:#1e5a6b;--badge-수산-bg:#e0f0f5;--badge-기타:#6b6b6b;--badge-기타-bg:#f0f0f0}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}.container{max-width:1400px;margin:0 auto;padding:20px}
+.header{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 32px;margin-bottom:20px}.header h1{font-size:22px;font-weight:700;color:var(--accent);letter-spacing:-.5px}.header-sub{font-size:13px;color:var(--text-muted);margin-top:4px}.header-meta{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}.header-meta-item{font-size:13px;color:var(--text-muted)}.header-meta-item strong{color:var(--text);font-weight:600;font-size:18px;display:block}
+.live-badge{display:inline-block;font-size:11px;padding:2px 10px;border-radius:10px;background:#e4f2e9;color:#2d6a3f;font-weight:500;margin-left:10px;vertical-align:middle}.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2d6a3f;margin-right:4px;animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.last-update{font-size:11px;color:var(--text-light);margin-top:8px}
+.summary-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}.summary-card{background:var(--surface);border:1px solid var(--border-light);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;text-align:center}.summary-card:hover{border-color:var(--accent);background:var(--accent-light)}.summary-card.active{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 1px var(--accent)}.summary-card .diocese{font-size:15px;font-weight:600}.summary-card .count{font-size:11px;color:var(--text-muted);margin-top:2px}
+.toolbar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}.search-box{flex:1;min-width:200px;position:relative}.search-box input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);outline:none;transition:border-color .15s}.search-box input:focus{border-color:var(--accent)}.search-box::before{content:"\1F50D";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px}.filter-select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--bg);outline:none;cursor:pointer}.result-count{font-size:12px;color:var(--text-muted);white-space:nowrap}.btn-reset{padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--surface);cursor:pointer;transition:all .15s;color:var(--text-muted)}.btn-reset:hover{background:var(--surface-alt);color:var(--text)}.btn-refresh{padding:8px 14px;border:1px solid var(--accent);border-radius:8px;font-size:12px;font-family:inherit;background:var(--accent-light);cursor:pointer;color:var(--accent);font-weight:500;transition:all .15s}.btn-refresh:hover{background:var(--accent);color:#fff}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px;min-width:1200px}thead th{position:sticky;top:0;background:var(--surface-alt);padding:10px 8px;text-align:left;font-weight:600;font-size:11px;color:var(--text-muted);border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;transition:background .1s}thead th:hover{background:var(--accent-light);color:var(--accent)}.sort-arrow{font-size:10px;margin-left:3px;opacity:.3}thead th.sorted .sort-arrow{opacity:1;color:var(--accent)}tbody td{padding:8px;border-bottom:1px solid var(--border-light);vertical-align:top}tbody tr{transition:background .08s;cursor:pointer}tbody tr:hover{background:var(--hover)}tbody tr:last-child td{border-bottom:none}
+.cat-badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;white-space:nowrap}.cat-가공{background:var(--badge-가공-bg);color:var(--badge-가공)}.cat-과수{background:var(--badge-과수-bg);color:var(--badge-과수)}.cat-채소{background:var(--badge-채소-bg);color:var(--badge-채소)}.cat-주잡곡{background:var(--badge-주잡곡-bg);color:var(--badge-주잡곡)}.cat-축산{background:var(--badge-축산-bg);color:var(--badge-축산)}.cat-수산{background:var(--badge-수산-bg);color:var(--badge-수산)}.cat-기타{background:var(--badge-기타-bg);color:var(--badge-기타)}
+.diocese-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.dot-광주{background:#2d6a3f}.dot-마산{background:#b85c3a}.dot-부산{background:#3a6cb8}.dot-안동{background:#7c5c9a}.dot-의정부{background:#3a8fb8}.dot-원주{background:#6B8E23}.dot-인천{background:#b83a5c}.dot-전주{background:#b8953a}.dot-청주{background:#5c9a3a}.dot-춘천{background:#3ab89f}
+.text-right{text-align:right}.text-center{text-align:center}.text-muted{color:var(--text-muted)}.cell-name{font-weight:500}.cell-product{color:var(--accent);font-weight:500}
+.detail-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100}.detail-overlay.show{display:flex;align-items:center;justify-content:center}.detail-panel{background:var(--surface);border-radius:14px;width:90%;max-width:720px;max-height:85vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.15);position:relative}.detail-panel h2{font-size:18px;font-weight:700;color:var(--accent);margin-bottom:4px}.detail-panel .sub{font-size:13px;color:var(--text-muted);margin-bottom:16px}.detail-grid{display:grid;grid-template-columns:100px 1fr;gap:6px 16px;font-size:13px;padding:14px 0;border-top:1px solid var(--border-light)}.detail-grid .label{color:var(--text-muted);font-weight:500}.detail-items{margin-top:16px}.detail-items h3{font-size:14px;font-weight:600;color:var(--text-muted);margin-bottom:8px}.detail-items table{min-width:auto}.detail-close{position:absolute;top:16px;right:20px;font-size:24px;cursor:pointer;color:var(--text-muted);background:none;border:none}.detail-close:hover{color:var(--text)}
+.map-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border:1px solid var(--accent);border-radius:6px;font-size:12px;color:var(--accent);background:var(--accent-light);cursor:pointer;text-decoration:none;font-family:inherit;transition:all .15s;margin-top:4px}.map-btn:hover{background:var(--accent);color:#fff}.map-btn svg{width:14px;height:14px;fill:currentColor}
+.profile-section{background:var(--accent-light);border:1px solid #c5dbb8;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:13px}.profile-section .pf-title{font-weight:600;color:var(--accent);margin-bottom:8px;font-size:13px}.profile-section .pf-grid{display:grid;grid-template-columns:80px 1fr;gap:4px 12px}.profile-section .pf-label{color:var(--accent-mid);font-weight:500}.profile-section .pf-empty{color:var(--text-light);font-style:italic}
+.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:14px;border-top:1px solid var(--border-light)}.page-btn{padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:var(--surface);cursor:pointer;transition:all .1s}.page-btn:hover{background:var(--surface-alt)}.page-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}.page-btn:disabled{opacity:.4;cursor:default}.page-info{font-size:12px;color:var(--text-muted);margin:0 8px}
+.view-tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--surface-alt);border-radius:10px;padding:3px;width:fit-content}.view-tab{padding:7px 16px;border-radius:8px;font-size:12px;font-family:inherit;border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-weight:500;transition:all .15s}.view-tab.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.loading{text-align:center;padding:60px 20px}.loading-spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:14px;color:var(--text-muted);margin-top:12px}.error-box{background:#fbe9e9;border:1px solid #e8b4b4;border-radius:10px;padding:16px 20px;color:#8b3a3a;font-size:13px}
+.footer{text-align:center;font-size:11px;color:var(--text-light);padding:20px}
+.download-badge{display:inline-block;font-size:11px;padding:2px 10px;border-radius:10px;background:var(--accent);color:#fff;font-weight:500;margin-left:6px;vertical-align:middle;text-decoration:none;transition:all .15s}.download-badge:hover{background:var(--accent-mid)}
+@media(max-width:768px){.container{padding:12px}.header{padding:20px}.header h1{font-size:18px}.toolbar{padding:12px}.summary-row{grid-template-columns:repeat(3,1fr)}}
+.insight-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.insight-title{font-size:16px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.insight-desc{font-size:12px;color:var(--text-muted);margin-bottom:16px}
+.calendar-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.cal-cell{text-align:center;border-radius:6px;padding:8px 2px;font-size:11px;position:relative}
+.cal-month{font-weight:600;font-size:12px;margin-bottom:4px}
+.cal-count{font-size:18px;font-weight:700}
+.cal-bar{height:4px;border-radius:2px;margin-top:4px}
+.cert-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.cert-label{width:50px;font-weight:600;text-align:right;flex-shrink:0}
+.cert-bars{flex:1;display:flex;height:22px;border-radius:4px;overflow:hidden}
+.cert-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
+.cert-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px}
+.cert-legend-item{display:flex;align-items:center;gap:4px}
+.cert-legend-dot{width:10px;height:10px;border-radius:2px}
+.ratio-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;margin-bottom:6px}
+.ratio-diocese{width:50px;font-weight:600;font-size:13px;flex-shrink:0}
+.ratio-bar-wrap{flex:1;height:18px;background:var(--border-light);border-radius:4px;overflow:hidden;position:relative}
+.ratio-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.ratio-pct{width:45px;text-align:right;font-weight:600;font-size:13px;flex-shrink:0}
+.ratio-detail{font-size:10px;color:var(--text-muted);width:160px;flex-shrink:0;text-align:right}
+.producer-dist{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.dist-card{background:var(--surface-alt);border-radius:8px;padding:12px;text-align:center}
+.dist-num{font-size:28px;font-weight:700;color:var(--accent)}
+.dist-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+.top-producers{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin-top:12px}
+.top-card{background:var(--surface-alt);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.top-name{font-weight:500;font-size:13px}
+.top-meta{font-size:11px;color:var(--text-muted)}
+.top-count{font-size:18px;font-weight:700;color:var(--accent)}
+@media(max-width:768px){.calendar-grid{grid-template-columns:repeat(4,1fr)}.cert-label{width:40px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>2026년 가톨릭농민회 생산계획 대시보드 (계속 업데이트) <span class="live-badge"><span class="live-dot"></span>실시간 연동</span> <a class="download-badge" href="https://docs.google.com/spreadsheets/d/1-9o_IPYxCH9ziZAqoGcYJvLSUrwmzg-pcyKg8vRLOi8/export?format=xlsx" target="_blank">⬇ 엑셀 다운로드</a></h1>
+    <div class="header-sub">10개 교구 생산계획서 통합 · 생산소비실무자회의 · 구글 시트 실시간 연동</div>
+    <div class="header-meta">
+      <div class="header-meta-item"><strong id="totalRecords">-</strong>레코드</div>
+      <div class="header-meta-item"><strong id="totalDioceses">-</strong>교구</div>
+      <div class="header-meta-item"><strong id="totalBranches">-</strong>분회</div>
+      <div class="header-meta-item"><strong id="totalProducers">-</strong>생산자</div>
+      <div class="header-meta-item"><strong id="totalCategories">-</strong>품목분류</div>
+      <div class="header-meta-item"><strong id="totalProducts">-</strong>생산품목</div>
+      <div class="header-meta-item"><strong id="totalOrganic">-</strong>유기농</div>
+      <div class="header-meta-item"><strong id="totalNoPest">-</strong>무농약</div>
+      <div class="header-meta-item"><strong id="totalGAP">-</strong>GAP</div>
+      <div class="header-meta-item"><strong id="totalNoAnti">-</strong>무항생제</div>
+    </div>
+    <div class="last-update" id="lastUpdate"></div>
+  </div>
+  <div class="summary-row" id="summaryRow"></div>
+  <div class="view-tabs">
+    <button class="view-tab active" onclick="setView('table')">데이터 테이블</button>
+    <button class="view-tab" onclick="setView('producer')">생산자별 조회</button>
+    <button class="view-tab" onclick="setView('insight')">인사이트</button>
+  </div>
+  <div id="tableView">
+    <div class="toolbar">
+      <div class="search-box"><input type="text" id="searchInput" placeholder="이름, 품목, 지역 등 검색..." oninput="applyFilters()"></div>
+      <select class="filter-select" id="filterCategory" onchange="applyFilters()"><option value="">품목별 전체</option><option value="가공">가공</option><option value="과수">과수</option><option value="채소">채소</option><option value="주잡곡">주잡곡</option><option value="축산">축산</option><option value="수산">수산</option><option value="기타">기타</option></select>
+      <select class="filter-select" id="filterMethod" onchange="applyFilters()"><option value="">생산방법 전체</option><option value="유기농">유기농</option><option value="무농약">무농약</option><option value="GAP">GAP</option><option value="무항생제">무항생제</option><option value="관행">관행</option><option value="일반">일반</option><option value="기타">기타</option></select>
+      <select class="filter-select" id="filterShipTime" onchange="applyFilters()"><option value="">출하시기 전체</option><option value="연중">연중</option><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option><option value="기타">기타</option></select>
+      <button class="btn-reset" onclick="resetFilters()">초기화</button>
+      <button class="btn-refresh" onclick="loadData()">새로고침</button>
+      <span class="result-count" id="resultCount"></span>
+    </div>
+    <div class="table-wrap"><div class="table-scroll">
+      <table><thead><tr>
+        <th onclick="sortBy('생산자ID')">ID <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('교구')">교구 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('분회')">분회 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('이름')">이름 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('품목별')">품목별 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('생산품목')">생산품목 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('품종')">품종 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('면적(㎡)')">면적(㎡) <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('생산방법')">생산방법 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('인증기간(연차)')">인증연차 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('총생산량')">총생산량 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('조직내출하량')">조직내출하량 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('출하량단위')">단위 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('출하시기')">출하시기 <span class="sort-arrow">↕</span></th>
+        <th>비고</th>
+      </tr></thead>
+      <tbody id="tableBody"><tr><td colspan="15"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">구글 시트에서 데이터를 불러오는 중...</div></div></td></tr></tbody>
+      </table></div><div class="pagination" id="pagination"></div></div>
+  </div>
+  <div id="producerView" style="display:none">
+    <div class="toolbar">
+      <div class="search-box"><input type="text" id="producerSearch" placeholder="생산자 이름 검색..." oninput="filterProducers()"></div>
+      <select class="filter-select" id="producerDiocese" onchange="filterProducers()"><option value="">교구 전체</option></select>
+      <select class="filter-select" id="producerRepCat" onchange="filterProducers()"><option value="">대표품목 전체</option><option value="주잡곡">주잡곡</option><option value="채소">채소</option><option value="과수">과수</option><option value="축산">축산</option><option value="수산">수산</option><option value="가공">가공</option></select>
+      <span class="result-count" id="producerCount"></span>
+    </div>
+    <div id="producerList"></div>
+  </div>
+  <div id="insightView" style="display:none">
+    <div id="insightContent"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">인사이트 분석 중...</div></div></div>
+  </div>
+  <div class="footer">2026년 가톨릭농민회 · 우리농촌살리기운동본부 · 생산소비실무자회의<br>구글 시트 실시간 연동 · 데이터 수정 시 새로고침으로 반영</div>
+</div>
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+<script>
+const SPREADSHEET_ID = "1-9o_IPYxCH9ziZAqoGcYJvLSUrwmzg-pcyKg8vRLOi8";
+const BASE = "https://docs.google.com/spreadsheets/d/" + SPREADSHEET_ID + "/export?format=csv&";
+const MAIN_URL = BASE + "gid=109635683";
+const PROFILE_URL = BASE + "gid=1147291711";
+
+let DATA=[], PROFILES={}, filtered=[], sortCol='', sortDir=1, currentPage=1, activeDiocese='';
+const PAGE_SIZE=50;
+
+function g(r,k){return(r[k]||'').trim()}
+function normCat(v){if(!v)return '';if(v.includes('가공'))return'가공';if(v.includes('과수')||v.includes('과일'))return'과수';if(v.includes('채소'))return'채소';if(v.includes('주')||v.includes('잡곡'))return'주잡곡';if(v.includes('축산')||v.includes('죽산'))return'축산';if(v.includes('수산'))return'수산';return v?'기타':''}
+function normMethod(v){if(!v)return '';if(v.includes('유기가공')||v.includes('유기농')||v==='유기'||v==='유')return'유기농';if(v.toLowerCase().includes('gap'))return'GAP';if(v.includes('무농약')||v.includes('무농'))return'무농약';if(v.includes('무항생'))return'무항생제';if(v.includes('관행'))return'관행';if(v.includes('일반'))return'일반';return'기타'}
+function matchShip(ship,f){
+  if(!ship||!f)return false;
+  if(f==='연중')return ship.includes('연중');
+  if(ship.includes('연중'))return false;
+  const m=parseInt(f);
+  // Check ranges like 6월~8월, 6~8월, 11월~2월
+  const rangeMatch=ship.match(/(\d{1,2})월?\s*~\s*(\d{1,2})월?/);
+  if(rangeMatch){
+    const s=parseInt(rangeMatch[1]),e=parseInt(rangeMatch[2]);
+    if(s<=e){if(m>=s&&m<=e)return true}
+    else{if(m>=s||m<=e)return true}
+  }
+  // Check comma-separated like 3월, 6월, 9월
+  const months=ship.match(/(\d{1,2})월/g);
+  if(months)return months.some(x=>parseInt(x)===m);
+  // Fallback: check plain numbers
+  const nums=ship.match(/\d+/g);
+  return nums?nums.some(n=>parseInt(n)===m):false;
+}
+
+function mapUrl(r){
+  let addr = g(r,'지번');
+  if(!addr) return '';
+  const d=g(r,'교구'), b=g(r,'분회');
+  if(addr && !addr.match(/^(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)/)){
+    if(b) addr = b + ' ' + addr;
+  }
+  return 'https://www.google.com/maps/search/' + encodeURIComponent(addr);
+}
+
+function loadData(){
+  document.getElementById('tableBody').innerHTML='<tr><td colspan="15"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">구글 시트에서 데이터를 불러오는 중...</div></div></td></tr>';
+  let loaded=0;
+  function checkDone(){if(++loaded>=2){initUI();applyFilters();const now=new Date();document.getElementById('lastUpdate').textContent='마지막 동기화: '+now.toLocaleDateString('ko-KR')+' '+now.toLocaleTimeString('ko-KR')}}
+  Papa.parse(MAIN_URL,{download:true,header:true,skipEmptyLines:true,
+    complete:function(r){DATA=r.data.filter(d=>g(d,'이름'));checkDone()},
+    error:function(e){document.getElementById('tableBody').innerHTML='<tr><td colspan="15"><div class="error-box">데이터를 불러오지 못했습니다.<br>이 파일은 웹 서버(GitHub Pages 등)에서 열어야 합니다.<br>로컬(file://)에서는 보안 정책으로 구글 시트 연결이 차단됩니다.<br><br>오류: '+e.message+'</div></td></tr>'}
+  });
+  Papa.parse(PROFILE_URL,{download:true,header:true,skipEmptyLines:true,
+    complete:function(r){r.data.forEach(d=>{const id=g(d,'생산자ID');if(id)PROFILES[id]=d});checkDone()},
+    error:function(){checkDone()}
+  });
+}
+
+function initUI(){
+  const row=document.getElementById('summaryRow');
+  const dioceses={};
+  DATA.forEach(r=>{const d=g(r,'교구');if(!d)return;if(!dioceses[d])dioceses[d]={records:0,producers:new Set()};dioceses[d].records++;dioceses[d].producers.add(g(r,'이름'))});
+  let html='<div class="summary-card active" onclick="toggleDiocese(\'\')"><div class="diocese">전체</div><div class="count">'+DATA.length+'건</div></div>';
+  const order=['광주','마산','부산','안동','의정부','원주','인천','전주','청주','춘천'];
+  order.forEach(d=>{const di=dioceses[d];const cnt=di?di.records:0;const prod=di?di.producers.size:0;html+='<div class="summary-card" onclick="toggleDiocese(\''+d+'\')"><div class="diocese"><span class="diocese-dot dot-'+d+'"></span>'+d+'</div><div class="count">'+(cnt?prod+'명 · '+cnt+'건':'제출 예정')+'</div></div>'});
+  row.innerHTML=html;
+  const ap=new Set(DATA.map(r=>g(r,'교구')+'_'+g(r,'이름')));
+  const aprod=new Set(DATA.map(r=>g(r,'생산품목')).filter(Boolean));
+  const acat=new Set(DATA.map(r=>normCat(g(r,'품목별'))).filter(Boolean));
+  const abranch=new Set(DATA.map(r=>g(r,'교구')+'_'+g(r,'분회')).filter(x=>!x.endsWith('_')));
+  let cOrg=0,cNP=0,cGAP=0,cNA=0;
+  DATA.forEach(r=>{const m=normMethod(g(r,'생산방법'));if(m==='유기농')cOrg++;else if(m==='무농약')cNP++;else if(m==='GAP')cGAP++;else if(m==='무항생제')cNA++});
+  document.getElementById('totalRecords').textContent=DATA.length.toLocaleString();
+  document.getElementById('totalProducers').textContent=ap.size;
+  document.getElementById('totalDioceses').textContent=order.length;
+  document.getElementById('totalBranches').textContent=abranch.size;
+  document.getElementById('totalCategories').textContent=acat.size;
+  document.getElementById('totalProducts').textContent=aprod.size;
+  document.getElementById('totalOrganic').textContent=cOrg.toLocaleString();
+  document.getElementById('totalNoPest').textContent=cNP.toLocaleString();
+  document.getElementById('totalGAP').textContent=cGAP.toLocaleString();
+  document.getElementById('totalNoAnti').textContent=cNA.toLocaleString();
+  const sel=document.getElementById('producerDiocese');
+  sel.innerHTML='<option value="">교구 전체</option>';
+  order.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o)});
+}
+
+function toggleDiocese(d){activeDiocese=(activeDiocese===d)?'':d;document.querySelectorAll('.summary-card').forEach((c,i)=>{if(i===0)c.classList.toggle('active',!activeDiocese);else c.classList.toggle('active',c.querySelector('.diocese').textContent.trim()===activeDiocese)});applyFilters()}
+
+function isStandardShip(s){if(!s)return true;if(s==='연중')return true;if(/^\d{1,2}월/.test(s))return true;return false}
+
+function applyFilters(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const cat=document.getElementById('filterCategory').value;
+  const method=document.getElementById('filterMethod').value;
+  const ship=document.getElementById('filterShipTime').value;
+  filtered=DATA.filter(r=>{
+    if(activeDiocese&&g(r,'교구')!==activeDiocese)return false;
+    if(cat){const nc=normCat(g(r,'품목별'));if(cat==='기타'){if(nc!=='기타'&&nc!=='')return false}else{if(nc!==cat)return false}}
+    if(method){const nm=normMethod(g(r,'생산방법'));if(method==='기타'){if(nm!=='기타'&&nm!=='')return false}else{if(nm!==method)return false}}
+    if(ship){const sv=g(r,'출하시기');if(ship==='기타'){if(isStandardShip(sv))return false}else if(!matchShip(sv,ship))return false}
+    if(q){const hay=(g(r,'이름')+g(r,'생산품목')+g(r,'품종')+g(r,'분회')+g(r,'교구')+g(r,'지번')+g(r,'생산방법')+g(r,'비고_원본')).toLowerCase();if(!hay.includes(q))return false}
+    return true;
+  });
+  currentPage=1;document.getElementById('resultCount').textContent=filtered.length+'건 / '+DATA.length+'건';renderTable()}
+
+function sortBy(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1}filtered.sort((a,b)=>{let va=g(a,col),vb=g(b,col);const na=parseFloat(va.replace(/,/g,'')),nb=parseFloat(vb.replace(/,/g,''));if(!isNaN(na)&&!isNaN(nb))return(na-nb)*sortDir;return va.localeCompare(vb,'ko')*sortDir});currentPage=1;renderTable()}
+
+function renderTable(){
+  const start=(currentPage-1)*PAGE_SIZE,page=filtered.slice(start,start+PAGE_SIZE);
+  let html='';
+  page.forEach(r=>{const cat=normCat(g(r,'품목별')),d=g(r,'교구');
+    html+='<tr onclick="showDetail(\''+d+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\')"><td class="text-muted" style="font-size:11px">'+g(r,'생산자ID')+'</td><td><span class="diocese-dot dot-'+d+'"></span>'+d+'</td><td>'+g(r,'분회')+'</td><td class="cell-name">'+g(r,'이름')+'</td><td>'+(cat?'<span class="cat-badge cat-'+cat+'">'+cat+'</span>':'')+'</td><td class="cell-product">'+g(r,'생산품목')+'</td><td class="text-muted">'+(g(r,'품종')||'-')+'</td><td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td><td>'+(g(r,'생산방법')||'-')+'</td><td class="text-center">'+(g(r,'인증기간(연차)')||'-')+'</td><td class="text-right">'+(g(r,'총생산량')||'-')+'</td><td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td><td class="text-center">'+(g(r,'출하량단위')||'-')+'</td><td>'+(g(r,'출하시기')||'-')+'</td><td class="text-muted" style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(g(r,'비고_원본').replace(/"/g,'&quot;'))+'">'+(g(r,'비고_원본')||'-')+'</td></tr>'});
+  document.getElementById('tableBody').innerHTML=html||'<tr><td colspan="15" style="text-align:center;padding:30px;color:var(--text-muted)">검색 결과가 없습니다.</td></tr>';renderPagination()}
+
+function renderPagination(){const total=Math.ceil(filtered.length/PAGE_SIZE),pg=document.getElementById('pagination');if(total<=1){pg.innerHTML='';return}let html='<button class="page-btn" onclick="goPage(1)" '+(currentPage===1?'disabled':'')+'>&laquo;</button><button class="page-btn" onclick="goPage('+(currentPage-1)+')" '+(currentPage===1?'disabled':'')+'>&lsaquo;</button>';let s=Math.max(1,currentPage-3),e=Math.min(total,s+6);if(e-s<6)s=Math.max(1,e-6);for(let i=s;i<=e;i++)html+='<button class="page-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';html+='<button class="page-btn" onclick="goPage('+(currentPage+1)+')" '+(currentPage===total?'disabled':'')+'>&rsaquo;</button><button class="page-btn" onclick="goPage('+total+')" '+(currentPage===total?'disabled':'')+'>&raquo;</button><span class="page-info">'+currentPage+' / '+total+'</span>';pg.innerHTML=html}
+function goPage(p){const total=Math.ceil(filtered.length/PAGE_SIZE);currentPage=Math.max(1,Math.min(total,p));renderTable();document.querySelector('.table-scroll').scrollTop=0}
+
+function showDetail(diocese,name){
+  const items=DATA.filter(r=>g(r,'교구')===diocese&&g(r,'이름')===name);
+  if(!items.length)return;
+  const r=items[0], pid=g(r,'생산자ID'), pf=PROFILES[pid]||{};
+  const cats={};items.forEach(it=>{const c=normCat(g(it,'품목별'));if(c)cats[c]=(cats[c]||0)+1});
+  const catStr=Object.entries(cats).map(([k,v])=>k+' '+v+'건').join(', ');
+  const addrs=[...new Set(items.map(i=>g(i,'지번')).filter(Boolean))];
+  const mainAddr=addrs[0]||'';
+
+  let html='<button class="detail-close" onclick="closeDetail()">&times;</button>';
+  html+='<h2>'+g(r,'이름')+'</h2>';
+  html+='<div class="sub"><span class="diocese-dot dot-'+diocese+'"></span>'+diocese+'교구 '+g(r,'분회')+'분회 · '+pid+' · '+items.length+'품목 ('+catStr+')</div>';
+
+  // Profile section
+  const pfFields=['대표품목','연락처','주소','이메일','영농경력','주요인증','특이사항'];
+  const hasPf=pfFields.some(f=>g(pf,f));
+  html+='<div class="profile-section"><div class="pf-title">생산자 정보'+(hasPf?'':'  (미입력)')+'</div><div class="pf-grid">';
+  pfFields.forEach(f=>{const v=g(pf,f);html+='<span class="pf-label">'+f+'</span><span class="'+(v?'':'pf-empty')+'">'+(v||'추후 입력 예정')+'</span>'});
+  // Show any extra columns from profile dynamically
+  if(pf){Object.keys(pf).forEach(k=>{if(!['생산자ID','교구','분회','이름'].includes(k)&&!pfFields.includes(k)){const v=g(pf,k);if(v)html+='<span class="pf-label">'+k+'</span><span>'+v+'</span>'}})}
+  html+='</div></div>';
+
+  // Map button
+  if(mainAddr){
+    const mu=mapUrl(r);
+    html+='<a class="map-btn" href="'+mu+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>지도에서 보기</a>';
+  }
+
+  html+='<div class="detail-grid" style="margin-top:12px">';
+  html+='<span class="label">주요 생산방법</span><span>'+[...new Set(items.map(i=>g(i,'생산방법')).filter(Boolean))].join(', ')+'</span>';
+  html+='<span class="label">인증 연차</span><span>'+[...new Set(items.map(i=>g(i,'인증기간(연차)')).filter(Boolean))].join(', ')+'</span>';
+  html+='<span class="label">주요 출하시기</span><span>'+[...new Set(items.map(i=>g(i,'출하시기')).filter(Boolean))].slice(0,5).join(', ')+'</span>';
+  const bigos=[...new Set(items.map(i=>g(i,'비고_원본')).filter(Boolean))];
+  if(bigos.length)html+='<span class="label">비고</span><span>'+bigos.join(', ')+'</span>';
+  html+='</div>';
+
+  html+='<div class="detail-items"><h3>생산 품목 목록</h3><div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>품목별</th><th>생산품목</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>단위</th><th>출하시기</th><th>지번</th></tr></thead><tbody>';
+  items.forEach(it=>{const c=normCat(g(it,'품목별')),addr=g(it,'지번'),mu=addr?mapUrl(it):'';
+    html+='<tr><td>'+(c?'<span class="cat-badge cat-'+c+'">'+c+'</span>':'')+'</td><td class="cell-product">'+g(it,'생산품목')+'</td><td>'+(g(it,'품종')||'-')+'</td><td class="text-right">'+(g(it,'면적(㎡)')||'-')+'</td><td>'+(g(it,'생산방법')||'-')+'</td><td class="text-right">'+(g(it,'총생산량')||'-')+'</td><td class="text-right">'+(g(it,'조직내출하량')||'-')+'</td><td class="text-center">'+(g(it,'출하량단위')||'-')+'</td><td>'+(g(it,'출하시기')||'-')+'</td><td style="font-size:11px">'+(addr?(mu?'<a href="'+mu+'" target="_blank" style="color:var(--accent);text-decoration:underline" title="지도에서 보기">'+addr+'</a>':addr):'-')+'</td></tr>'});
+  html+='</tbody></table></div></div>';
+  document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show')}
+function showCertDetail(diocese,cert,count){
+  const items=DATA.filter(r=>{
+    if(g(r,'교구')!==diocese)return false;
+    const m=normMethod(g(r,'생산방법'));
+    const c=['유기농','무농약','GAP','무항생제','관행','일반'].includes(m)?m:'기타';
+    return c===cert;
+  });
+  if(!items.length)return;
+  const producers={};
+  items.forEach(r=>{
+    const k=g(r,'이름');
+    if(!producers[k])producers[k]={이름:g(r,'이름'),분회:g(r,'분회'),id:g(r,'생산자ID'),items:[]};
+    producers[k].items.push(r);
+  });
+  const list=Object.values(producers).sort((a,b)=>a.이름.localeCompare(b.이름,'ko'));
+
+  let html='<button class="detail-close" onclick="closeDetail()">&times;</button>';
+  html+='<h2>'+diocese+'교구 · '+cert+'</h2>';
+  html+='<div class="sub">'+list.length+'명 생산자 · '+items.length+'건</div>';
+
+  html+='<div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>분회</th><th>이름</th><th>생산품목</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>단위</th><th>출하시기</th></tr></thead><tbody>';
+  items.sort((a,b)=>g(a,'분회').localeCompare(g(b,'분회'),'ko')||g(a,'이름').localeCompare(g(b,'이름'),'ko')).forEach(r=>{
+    html+='<tr style="cursor:pointer" onclick="closeDetail();setTimeout(()=>showDetail(\''+diocese+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\'),100)">';
+    html+='<td>'+g(r,'분회')+'</td>';
+    html+='<td class="cell-name">'+g(r,'이름')+'</td>';
+    html+='<td class="cell-product">'+g(r,'생산품목')+'</td>';
+    html+='<td>'+(g(r,'품종')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td>';
+    html+='<td>'+g(r,'생산방법')+'</td>';
+    html+='<td class="text-right">'+(g(r,'총생산량')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td>';
+    html+='<td class="text-center">'+(g(r,'출하량단위')||'-')+'</td>';
+    html+='<td>'+(g(r,'출하시기')||'-')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show');
+}
+function showCertDetail(diocese,cert){
+  const items=DATA.filter(r=>g(r,'교구')===diocese&&normMethod(g(r,'생산방법'))===cert);
+  if(!items.length)return;
+  const producers=new Set(items.map(r=>g(r,'이름'))).size;
+
+  let html='<button class="detail-close" onclick="closeDetail()">&times;</button>';
+  html+='<h2><span class="diocese-dot dot-'+diocese+'"></span>'+diocese+'교구 — '+cert+'</h2>';
+  html+='<div class="sub">'+producers+'명 생산자 · '+items.length+'건</div>';
+
+  html+='<div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>분회</th><th>이름</th><th>생산품목</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>단위</th><th>출하시기</th></tr></thead><tbody>';
+  items.sort((a,b)=>g(a,'분회').localeCompare(g(b,'분회'),'ko')||g(a,'이름').localeCompare(g(b,'이름'),'ko')).forEach(r=>{
+    html+='<tr style="cursor:pointer" onclick="closeDetail();setTimeout(()=>showDetail(\''+diocese+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\'),100)">';
+    html+='<td>'+g(r,'분회')+'</td>';
+    html+='<td class="cell-name">'+g(r,'이름')+'</td>';
+    html+='<td class="cell-product">'+g(r,'생산품목')+'</td>';
+    html+='<td>'+(g(r,'품종')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td>';
+    html+='<td>'+(g(r,'생산방법')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'총생산량')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td>';
+    html+='<td class="text-center">'+(g(r,'출하량단위')||'-')+'</td>';
+    html+='<td>'+(g(r,'출하시기')||'-')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show');
+}
+function showProductDetail(product,cat){
+  const items=DATA.filter(r=>g(r,'생산품목')===product);
+  if(!items.length)return;
+  const producers={};
+  items.forEach(r=>{
+    const k=g(r,'교구')+'_'+g(r,'이름');
+    if(!producers[k])producers[k]={교구:g(r,'교구'),분회:g(r,'분회'),이름:g(r,'이름'),id:g(r,'생산자ID'),items:[]};
+    producers[k].items.push(r);
+  });
+  const list=Object.values(producers).sort((a,b)=>a.교구.localeCompare(b.교구,'ko')||a.이름.localeCompare(b.이름,'ko'));
+
+  let html='<button class="detail-close" onclick="closeDetail()">&times;</button>';
+  html+='<h2>'+product+'</h2>';
+  html+='<div class="sub"><span class="cat-badge cat-'+cat+'">'+cat+'</span> · '+list.length+'명 생산자 · '+items.length+'건</div>';
+
+  html+='<div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>교구</th><th>분회</th><th>이름</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>단위</th><th>출하시기</th></tr></thead><tbody>';
+  items.sort((a,b)=>g(a,'교구').localeCompare(g(b,'교구'),'ko')).forEach(r=>{
+    const d=g(r,'교구');
+    html+='<tr style="cursor:pointer" onclick="closeDetail();setTimeout(()=>showDetail(\''+d+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\'),100)">';
+    html+='<td><span class="diocese-dot dot-'+d+'"></span>'+d+'</td>';
+    html+='<td>'+g(r,'분회')+'</td>';
+    html+='<td class="cell-name">'+g(r,'이름')+'</td>';
+    html+='<td>'+(g(r,'품종')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td>';
+    html+='<td>'+(g(r,'생산방법')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'총생산량')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td>';
+    html+='<td class="text-center">'+(g(r,'출하량단위')||'-')+'</td>';
+    html+='<td>'+(g(r,'출하시기')||'-')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show');
+}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('show')}
+
+function resetFilters(){document.getElementById('searchInput').value='';document.getElementById('filterCategory').value='';document.getElementById('filterMethod').value='';document.getElementById('filterShipTime').value='';activeDiocese='';document.querySelectorAll('.summary-card').forEach((c,i)=>c.classList.toggle('active',i===0));applyFilters()}
+
+function setView(v){document.querySelectorAll('.view-tab').forEach((t,i)=>t.classList.toggle('active',i===(v==='table'?0:v==='producer'?1:2)));document.getElementById('tableView').style.display=v==='table'?'':'none';document.getElementById('producerView').style.display=v==='producer'?'':'none';document.getElementById('insightView').style.display=v==='insight'?'':'none';if(v==='producer')renderProducers();if(v==='insight')renderInsights()}
+
+function renderProducers(){
+  const q=(document.getElementById('producerSearch').value||'').trim().toLowerCase();
+  const diocese=document.getElementById('producerDiocese').value;
+  const producers={};
+  DATA.forEach(r=>{const key=g(r,'교구')+'_'+g(r,'이름');if(!producers[key])producers[key]={id:g(r,'생산자ID'),교구:g(r,'교구'),분회:g(r,'분회'),이름:g(r,'이름'),items:[],methods:new Set(),cats:{},대표품목:g(PROFILES[g(r,'생산자ID')]||{},'대표품목')};producers[key].items.push(r);const m=g(r,'생산방법');if(m)producers[key].methods.add(normMethod(m));const c=normCat(g(r,'품목별'));if(c)producers[key].cats[c]=(producers[key].cats[c]||0)+1});
+  let list=Object.values(producers);
+  if(diocese)list=list.filter(p=>p.교구===diocese);
+  const repCat=document.getElementById('producerRepCat').value;
+  if(repCat)list=list.filter(p=>p.대표품목===repCat);
+  if(q)list=list.filter(p=>(p.이름+p.분회+p.items.map(i=>g(i,'생산품목')).join(' ')).toLowerCase().includes(q));
+  document.getElementById('producerCount').textContent=list.length+'명';
+  let html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">';
+  list.forEach(p=>{const catBadges=Object.entries(p.cats).map(([k,v])=>'<span class="cat-badge cat-'+k+'">'+k+' '+v+'</span>').join(' ');const products=p.items.map(i=>g(i,'생산품목')).filter(Boolean).slice(0,6).join(', ');const more=p.items.length>6?' 외 '+(p.items.length-6)+'건':'';const pf=PROFILES[p.id]||{};const hasInfo=g(pf,'연락처')||g(pf,'주소');
+    html+='<div class="summary-card" style="text-align:left;padding:16px;cursor:pointer" onclick="showDetail(\''+p.교구+'\',\''+p.이름.replace(/'/g,"\\'")+'\')">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:start"><div><div class="diocese" style="font-size:15px"><span class="diocese-dot dot-'+p.교구+'"></span>'+p.이름+(p.대표품목?' <span class="cat-badge cat-'+p.대표품목+'" style="font-size:10px;vertical-align:middle">대표: '+p.대표품목+'</span>':'')+'</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+p.교구+' '+p.분회+' · '+p.id+(hasInfo?' · 상세정보 있음':'')+'</div></div><div style="font-size:18px;font-weight:600;color:var(--accent)">'+p.items.length+'<span style="font-size:11px;font-weight:400;color:var(--text-muted)"> 품목</span></div></div>';
+    html+='<div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">'+catBadges+'</div>';
+    html+='<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">'+products+more+'</div>';
+    html+='<div style="margin-top:6px;font-size:11px;color:var(--text-light)">'+(p.methods.size?[...p.methods].join(', '):'')+'</div></div>'});
+  html+='</div>';document.getElementById('producerList').innerHTML=html}
+function filterProducers(){renderProducers()}
+
+function renderInsights(){
+  if(!DATA.length)return;
+  const el=document.getElementById('insightContent');
+  let html='';
+
+  // === 1. Monthly Calendar ===
+  const monthly={};for(let m=1;m<=12;m++)monthly[m]=0;
+  let yearround=0;
+  DATA.forEach(r=>{
+    const s=g(r,'출하시기');
+    if(!s)return;
+    if(s.includes('연중')){yearround++;for(let m=1;m<=12;m++)monthly[m]++;return}
+    const rm=s.match(/(\d{1,2})월?\s*~\s*(\d{1,2})월?/);
+    if(rm){let s1=parseInt(rm[1]),s2=parseInt(rm[2]);if(s1<=s2)for(let m=s1;m<=s2;m++)monthly[m]++;else{for(let m=s1;m<=12;m++)monthly[m]++;for(let m=1;m<=s2;m++)monthly[m]++}return}
+    const ms=s.match(/(\d{1,2})월/g);
+    if(ms)ms.forEach(x=>{const n=parseInt(x);if(n>=1&&n<=12)monthly[n]++})
+  });
+  const maxM=Math.max(...Object.values(monthly));
+  const avgM=Object.values(monthly).reduce((a,b)=>a+b,0)/12;
+  const mNames=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  
+  html+='<div class="insight-section"><div class="insight-title">월별 출하 캘린더</div><div class="insight-desc">전국 기준 월별 출하 가능 품목 수. 색이 진할수록 출하가 집중됩니다. (연중 출하 '+yearround+'건 포함)</div>';
+  html+='<div class="calendar-grid">';
+  for(let m=1;m<=12;m++){
+    const v=monthly[m];
+    const step=Math.max(0,Math.min(11,Math.round((v-200)/(1000-200)*11)));
+    const light=90-step*5;
+    const sat=25+step*5;
+    const bg='hsl(140,'+sat+'%,'+light+'%)';
+    const tc=step>6?'#ffffff':'#1e3a1e';
+    html+='<div class="cal-cell" style="background:'+bg+';color:'+tc+'"><div class="cal-month">'+mNames[m-1]+'</div><div class="cal-count">'+v+'</div></div>';
+  }
+  html+='</div></div>';
+
+  // === 2. Diocese certification ===
+  const certColors={'유기농':'2C5F2D','무농약':'4A7A2E','GAP':'3A6CB8','무항생제':'7C5C9A','관행':'B85C3A','일반':'B8953A','기타':'999999'};
+  const certOrder=['유기농','무농약','GAP','무항생제','관행','일반','기타'];
+  const dioceseOrder=['광주','마산','부산','안동','의정부','원주','인천','전주','청주','춘천'];
+  
+  html+='<div class="insight-section"><div class="insight-title">교구별 인증 현황</div><div class="insight-desc">교구별 생산방법(인증) 분포. 막대 길이는 해당 교구의 총 품목 수에 비례합니다.</div>';
+  
+  let maxDiocese=0;
+  dioceseOrder.forEach(d=>{const cnt=DATA.filter(r=>g(r,'교구')===d).length;if(cnt>maxDiocese)maxDiocese=cnt});
+  
+  dioceseOrder.forEach(d=>{
+    const sub=DATA.filter(r=>g(r,'교구')===d);
+    if(!sub.length)return;
+    const certs={};
+    sub.forEach(r=>{const m=normMethod(g(r,'생산방법'));const c=certOrder.includes(m)?m:'기타';certs[c]=(certs[c]||0)+1});
+    const total=sub.length;
+    const barPct=Math.round(total/maxDiocese*100);
+    html+='<div class="cert-row"><span class="cert-label">'+d+'</span><div style="flex:1"><div style="display:flex;height:22px;border-radius:4px;overflow:hidden;width:'+barPct+'%" title="총 '+total+'건">';
+    certOrder.forEach(c=>{
+      if(!certs[c])return;
+      const w=Math.max(certs[c]/total*100, 3);
+      html+='<div class="cert-seg" style="width:'+w+'%;background:#'+certColors[c]+';cursor:pointer" onclick="showCertDetail(\''+d+'\',\''+c+'\')" title="'+d+' '+c+' '+certs[c]+'건">'+(certs[c]/total*100>8?certs[c]:'')+'</div>';
+    });
+    html+='</div></div><span style="font-size:11px;color:var(--text-muted);width:40px;text-align:right">'+total+'</span></div>';
+  });
+  html+='<div class="cert-legend">';
+  certOrder.forEach(c=>{html+='<div class="cert-legend-item"><div class="cert-legend-dot" style="background:#'+certColors[c]+'"></div>'+c+'</div>'});
+  html+='</div></div>';
+
+  // === 3. Category-Product Map with Sub-classification ===
+  const subClassify={
+    '채소':{
+      '엽채류(잎채소)':['상추','배추','시금치','쑥갓','깻잎','케일','청경채','양배추','갓','청갓','근대','아욱','얼갈이배추','열무','모듬쌈','쌈채소','치커리','배추봄동','단배추','토종배추','통배추','모듬쌈채','호박잎','얼갈이','가을배추','단배추','모듬쌈채','봄동','곰보배추','민들레잎'],
+      '과채류(열매채소)':['고추','건고추','풋고추','청양고추','고춧가루','건고춧가루','고춧(가루)','고추건고추','오이','호박','단호박','가지','토마토','피망','파프리카','수박','메론','딸기','여주','수세미','노각오이','호박늙은','호박풋','호박늙은호박','미니단호박','단호박(미니)','단호박(미니밤)','단호박(미니밤_','토마토(대추)','토마토(에그)','토마토(대추방울)','토마토(완숙)','가지고추','옥수수','옥수수검정찰'],
+      '근채류(뿌리채소)':['감자','고구마','마늘','생강','우엉','당근','무','무우','연근','도라지','더덕','토란','인삼','산양삼','울금','강황','인디안감자','단마','알타리','알타리무','봄무','봄당근','가을무','가을당근','작약','마늘(홍산)','산더덕','자색양파'],
+      '양념채소':['대파','쪽파','부추','양파','달래','마늘쫑','산초','제피순','마늘잎','올마늘','파','마늘/다래','대파,쪽파','마늘풋마늘'],
+      '산나물류':['고사리','두릅','취나물','엄나무순','곰취','머위','명이나물','곤드레','냉이','방풍나물','참죽순','산마늘','산나물류','두릅순','참가죽순','엄나무','참죽나무순','엄나무순','산나물류(두릅외)','두릅(땅)','산마늘,눈개승마','고사리,드릅,곰취','더덕,도라지,황기','머위순','참 취','머 위','가죽','산나무 고사리','참가죽순','두릅순,엄나무순','메밀순나물'],
+      '버섯류':['표고버섯','생표고','건표고','느타리','목이버섯','노루궁뎅이버섯','송고버섯','버섯','생표고버섯','버섯느타리','표고버섯(깍뚝)','표고버섯(원형)','표고버섯(슬라이스)','(건)표고'],
+      '건나물·건채소':['(건)고사리','무말랭이','호박말림','시래기','건가지','고사리(건)','가죽나물(건)','도라지(건)','더덕(건)','취나물(건)','건고사리','무청'],
+      '콩·두류':['콩','콩나물','콩나물콩','들깨','참깨','백태','피완두콩','쥐눈이콩','유월콩','들깨,콩,녹두','팥,들깨,방풍'],
+    },
+    '과수':{
+      '사과':['사과','사과즙'],
+      '배':['배','배조생','배만생','배그린배','돌배'],
+      '감류':['감','단감','떫은감','대봉감','곶감','감말랭이','곶감,감말랭이','대봉','떪은감'],
+      '복숭아·자두':['복숭아','자두','살구','자두살구','플럼코트 복숭아','개복숭아','대석','포무사'],
+      '포도':['포도','청포도','포도(청)'],
+      '베리류':['블루베리','아로니아','오미자','오디/초코베리','꾸지뽕','블루베리/블루퀸 등 3종'],
+      '핵과·견과':['밤','호두','대추','매실','산수유','모과','매 실','은행','마가목'],
+      '열대·기타과일':['무화과','참다래','다래','포포','참외','체리','딸기','수박','방울토마토','대추방울토마토','메론','복수박','뽕나무'],
+      '과일가공':['블루베리즙','무화과말랭이','꾸지뽕차','반건조꾸지뽕 열매','포도(즙)','매실(청)','블루베리500g','사과즙'],
+    },
+    '주잡곡':{
+      '쌀·벼':['메벼','벼','찰벼','벼찰벼','흑미','적미','쌀','발아현미','발아녹미','발아삼색미','발아오색미','발아적미','발아찹쌀현미','발아찰현미','발아흑미','오색찹쌀','누룽지쌀','벼기타유색미','벼흑미','벼찰흑벼','벼홍미','메벼(만생)','백미,찹쌀,현미','고대미영양잡곡쌀','고대미잡곡쌀','수수쌀'],
+      '잡곡':['보리','밀','메밀','기장','차조','수수','찰수수','율무','귀리','호밀','밀/메밀'],
+      '콩류':['콩','서리태','메주콩','백태','콩나물콩','콩백태','콩서리태','녹두','콩완두','콩호랑이콩','콩호랑이콩깍지','완두콩','서리콩','흰콩','콩작두콩','들깨,서리태'],
+      '깨·유지':['깨','참깨','들깨','땅콩','깨참깨','참깨/들깨/고추','고추/들깨','호두/들깨/참깨'],
+    },
+    '가공':{
+      '장류':['간장','된장','고추장','메주','알메주','한식간장','산된장','청국장','막장가루','메주가루(고추장샘)','메주가루(막장용)','고추장샘','간장(콩)','된장(콩)','오곡조청고추장','마늘고추장','풀의정','갈대청국장가루','청국장가루','검은콩청국장가루','청국장(콩)','청국장찌게200g','청국장찌게500g'],
+      '장아찌·김치':['배추김치','깍두기','열무얼갈이김치','절임배추','무말랭이김치','마늘장아찌','고추장아찌','명이장아찌','순무장아찌','깻잎장아찌','곰취장아찌','죽순장아찌','궁채장아찌','부추장아찌','쪽파장아찌','셀러리장아찌','장아찌혼합장','마늘쫑장아지','비비추장아찌','참죽고추장장아찌','참죽 고추장 자반','꾸지뽕자아찌','오이지(오이)','토종배추 곤짠지'],
+      '즙·음료':['배즙','사과즙','도라지배즙','더덕도라지배즙','호박즙','블루베리즙','민들레즙','돌배즙','칡즙','양배추즙','토마토즙','자색양파즙','석류오미자즙','수세미배즙','야채수','수정과','블루베리즙,잼','하늘향기500ml','하늘향기1000ml'],
+      '식초·효소':['감식초','사과식초','현미식초','식초','식초(현미)','산야초효소','쑥효소','오디효소','유기농 감식초','감식초(감)','현미효소(만년의힘)'],
+      '차류':['작두콩차','보리차','현미차','녹차','생강차','울금차','돼지감자차','둥굴레차','캐모마일차','표고버섯차','무말랭이차','무잎차','블랙보리차','비트차','옥수수차','콜라비차','콩비지차','둥굴레','고욤감잎차','고욤잎차','아마란스차','발효현미차','적미통차','현미통차','흑미통차','작두콩티백','녹차티백','녹차(가루)','녹차(대작)','녹차(발효차)','녹차(세작)','녹차(우전)','녹차(중작)','녹차선물세트','토종배추 뿌리차','박하'],
+      '청·시럽·조청':['생강청','대추청','황매실액','현미조청','오곡조청','수수조청','쌀조청','쌀물엿','쌀엿','곡물당','곡물당딸기쨈','남다른생강청','홍도라지청','발효생강','요리생강','딸기잼'],
+      '분말·가루':['미숫가루','쌀가루','녹두가루','단호박가루','찹쌀가루','현미찹쌀가루','콩가루','표고버섯분말','울금분말','울금분말/강황분말','꾸지뽕가루','작두콩분말','발아오색미숫가루','발아현미쌀가루','볶은귀리가루','무설탕고구마라떼','강황라이스','비트라이스'],
+      '환':['상추환','새싹보리환','양배추환','울금환','작두콩환','강옥환','고소애환','고소애환스틱'],
+      '진액·엑기스':['꾸지뽕진액','헛개진액','헛개녹용액골드','익모초액','민들레진액','쑥진액','개똥쑥진액','구지뽕진액'],
+      '기름':['참기름','들기름'],
+      '수산가공':['다시마','미역','김','김(유기농김)','톳','파래','매생이','멸치','새우','까나리','황태','굴비','간고등어','꽃게','꽃게간장','새우장','전복장'],
+      '젓갈·액젓':['멸치젓','멸치액젓','갈치속젓','갈치액젓','새우젓','새우젓김장','새우젓무침','새우젓북새우','새우젓육젓','새우젓(참젓)','새우젓(육젓)','황석어젓','어간장'],
+      '유제품':['딸기요구르트','사과요구르트','플레인요구르트','초코우유','유제품','우리밀고추장밀키트'],
+      '제과·스낵':['현미강정','김부각','새송이부각','고추부각','현미튀밥','7뻥스낵','참죽다섯가지곡물스낵','하수오다섯가지곡물스낵','약도라지다섯가지 곡물스낵','홍삼다섯가지 곡물스낵','볶은귀리','참고소애누룽지','꽃벵이'],
+      '면류':['메밀국수','백밀국수','통밀국수','수제비(숙면)','부침가루','튀김가루','밀/통밀가루'],
+      '빵·떡':['현미쌀빵','녹두전'],
+      '두부·콩가공':['두부','청국장가루','검은콩청국장가루'],
+      '양봉·꿀':['양봉','꿀','프로폴리스','벌꿀','꿀'],
+      '소금':['소금','장맛소금','칫솔에소금'],
+    },
+    '축산':{
+      '육류':['한우','돼지','육계/삼계'],
+      '달걀':['유정란','계란','유정란(청란)'],
+      '양봉·꿀':['벌꿀','아카시아꿀','잡화꿀','야생화꿀','꿀','로얄제리'],
+    },
+    '수산':{
+      '해조류':['미역100g','미역200g','미역','다시마200g','다시마(씻어말린잎)','다시마분말200g','다시마알250g','다시마알500g'],
+    },
+  };
+
+  function getSubClass(cat, productName){
+    const subs=subClassify[cat];
+    if(!subs)return '기타';
+    for(const[subName,items] of Object.entries(subs)){
+      if(items.some(item=>productName===item||productName.includes(item)||item.includes(productName)))return subName;
+    }
+    return '기타';
+  }
+
+  const catProducts={};
+  const catCounts={};
+  const catSubProducts={};
+  DATA.forEach(r=>{
+    const c=normCat(g(r,'품목별'));
+    const p=g(r,'생산품목');
+    if(!c||!p)return;
+    if(!catProducts[c])catProducts[c]={};
+    catProducts[c][p]=(catProducts[c][p]||0)+1;
+    catCounts[c]=(catCounts[c]||0)+1;
+    const sub=getSubClass(c,p);
+    if(!catSubProducts[c])catSubProducts[c]={};
+    if(!catSubProducts[c][sub])catSubProducts[c][sub]={};
+    catSubProducts[c][sub][p]=(catSubProducts[c][sub][p]||0)+1;
+  });
+  const catColors2={'가공':'7c5c3a','과수':'8b3a3a','채소':'2d6a3f','주잡곡':'6b5b1e','축산':'5a3d6b','수산':'1e5a6b','기타':'6b6b6b'};
+  const catBgColors={'가공':'f5ede4','과수':'fbe9e9','채소':'e4f2e9','주잡곡':'f5f0dc','축산':'f0e8f5','수산':'e0f0f5','기타':'f0f0f0'};
+  const catOrder2=['채소','과수','주잡곡','가공','축산','수산','기타'];
+  
+  html+='<div class="insight-section"><div class="insight-title">품목분류별 생산품목</div><div class="insight-desc">소분류별로 그룹핑된 생산품목. 숫자는 등록 건수. 클릭하면 해당 품목의 생산자를 볼 수 있습니다.</div>';
+  
+  catOrder2.forEach(cat=>{
+    if(!catSubProducts[cat])return;
+    const total=catCounts[cat];
+    const totalKinds=Object.keys(catProducts[cat]).length;
+    
+    html+='<div style="background:#'+catBgColors[cat]+';border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:16px 18px;margin-bottom:12px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html+='<span style="font-weight:700;font-size:16px;color:#'+catColors2[cat]+'">'+cat+'</span>';
+    html+='<span style="font-size:12px;color:#'+catColors2[cat]+';opacity:0.7">'+total+'건 · '+totalKinds+'종</span></div>';
+    
+    const subOrder=Object.keys(catSubProducts[cat]).filter(s=>s!=='기타');
+    if(catSubProducts[cat]['기타'])subOrder.push('기타');
+    
+    subOrder.forEach(sub=>{
+      const items=Object.entries(catSubProducts[cat][sub]).sort((a,b)=>b[1]-a[1]);
+      const subTotal=items.reduce((s,x)=>s+x[1],0);
+      html+='<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:#'+catColors2[cat]+';opacity:0.8;margin-bottom:4px">'+sub+' <span style="font-weight:400;opacity:0.6">('+subTotal+'건 · '+items.length+'종)</span></div>';
+      html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+      items.forEach(([name,cnt])=>{
+        html+='<span onclick="showProductDetail(\''+name.replace(/'/g,"\\'")+'\',\''+cat+'\')" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;background:rgba(255,255,255,0.55);color:#'+catColors2[cat]+';cursor:pointer;transition:all .1s" onmouseover="this.style.background=\'rgba(255,255,255,0.9)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.55)\'">'+name+' <b>'+cnt+'</b></span>';
+      });
+      html+='</div></div>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+
+  // === 4. Producer scale ===
+  const prodItems={};
+  DATA.forEach(r=>{const k=g(r,'교구')+'_'+g(r,'이름');prodItems[k]=(prodItems[k]||0)+1});
+  const counts=Object.values(prodItems);
+  const dist=[
+    {label:'1품목',min:1,max:1},
+    {label:'2~3품목',min:2,max:3},
+    {label:'4~5품목',min:4,max:5},
+    {label:'6~10품목',min:6,max:10},
+    {label:'11품목 이상',min:11,max:999}
+  ];
+  
+  html+='<div class="insight-section"><div class="insight-title">생산자 규모 분포</div>';
+  html+='<div class="producer-dist">';
+  dist.forEach(({label,min,max})=>{
+    const cnt=counts.filter(c=>c>=min&&c<=max).length;
+    html+='<div class="dist-card"><div class="dist-num">'+cnt+'</div><div class="dist-label">'+label+'</div></div>';
+  });
+  html+='</div>';
+  
+  // Top producers by item count
+  const sorted=Object.entries(prodItems).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  html+='<div style="margin-top:16px;font-size:13px;font-weight:600;color:var(--text-muted)">다품목 생산자 TOP 12</div>';
+  html+='<div class="top-producers">';
+  sorted.forEach(([k,cnt])=>{
+    const[d,name]=k.split('_');
+    html+='<div class="top-card" style="cursor:pointer" onclick="showDetail(\''+d+'\',\''+name.replace(/'/g,"\\'")+'\')">';
+    html+='<div><div class="top-name"><span class="diocese-dot dot-'+d+'"></span>'+name+'</div><div class="top-meta">'+d+'</div></div>';
+    html+='<div class="top-count">'+cnt+'<span style="font-size:11px;font-weight:400;color:var(--text-muted)"> 품목</span></div></div>';
+  });
+  html+='</div></div>';
+
+  el.innerHTML=html;
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail()});
+loadData();
+</script>
+</body>
+</html>
